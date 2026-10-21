@@ -81,13 +81,11 @@ export function PropertiesPanel({ d }: { d: AppData }) {
     if (
       await run(
         () =>
-          supabase
-            .from("properties")
-            .insert({
-              name: String(f.get("name")),
-              location: String(f.get("location")),
-              landlord_id: d.uid,
-            }),
+          supabase.from("properties").insert({
+            name: String(f.get("name")),
+            location: String(f.get("location")),
+            landlord_id: d.uid,
+          }),
         "House added",
       )
     ) {
@@ -228,15 +226,13 @@ function RoomRow({ d, room }: { d: AppData; room: Room }) {
         .eq("id", lease.id),
     );
     if (ok) {
-      await supabase
-        .from("notices")
-        .insert({
-          property_id: room.property_id,
-          author_id: d.uid,
-          kind: "move_out",
-          title: "Move-out",
-          body: `${nameOf(d, lease.tenant_id)} moved out of ${room.name}`,
-        });
+      await supabase.from("notices").insert({
+        property_id: room.property_id,
+        author_id: d.uid,
+        kind: "move_out",
+        title: "Move-out",
+        body: `${nameOf(d, lease.tenant_id)} moved out of ${room.name}`,
+      });
       toast.success("Lease ended");
       refresh();
     }

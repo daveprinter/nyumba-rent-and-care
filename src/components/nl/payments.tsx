@@ -150,15 +150,13 @@ export function TenantRent({ d }: { d: AppData }) {
     const bill = unpaid.find((b) => b.id === billId) ?? unpaid[0];
     const ok = await run(
       () =>
-        supabase
-          .from("payments")
-          .insert({
-            lease_id: lease!.id,
-            bill_id: bill?.id ?? null,
-            tenant_id: d.uid,
-            mpesa_code: normalizeCode(code),
-            amount: Number(amount || bill?.amount || lease!.monthly_rent),
-          }),
+        supabase.from("payments").insert({
+          lease_id: lease!.id,
+          bill_id: bill?.id ?? null,
+          tenant_id: d.uid,
+          mpesa_code: normalizeCode(code),
+          amount: Number(amount || bill?.amount || lease!.monthly_rent),
+        }),
       "Code verified and saved. Now send it to your landlord or caretaker.",
     );
     if (ok) {

@@ -17,14 +17,12 @@ export function MaintenancePanel({ d }: { d: AppData }) {
     if (
       await run(
         () =>
-          supabase
-            .from("maintenance_requests")
-            .insert({
-              lease_id: lease!.id,
-              tenant_id: d.uid,
-              title: String(f.get("title")),
-              description: String(f.get("description")),
-            }),
+          supabase.from("maintenance_requests").insert({
+            lease_id: lease!.id,
+            tenant_id: d.uid,
+            title: String(f.get("title")),
+            description: String(f.get("description")),
+          }),
         "Fault reported",
       )
     ) {
@@ -236,14 +234,12 @@ export function TimelinePanel({ d }: { d: AppData }) {
     if (
       await run(
         () =>
-          supabase
-            .from("notices")
-            .insert({
-              property_id: pid!,
-              author_id: d.uid,
-              title: String(f.get("title")),
-              body: String(f.get("body")),
-            }),
+          supabase.from("notices").insert({
+            property_id: pid!,
+            author_id: d.uid,
+            title: String(f.get("title")),
+            body: String(f.get("body")),
+          }),
         "Notice posted",
       )
     ) {
