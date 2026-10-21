@@ -32,6 +32,11 @@ export const staffLogin = createServerFn({ method: "POST" })
         .from("staff_codes")
         .update({ user_id: created.data.user.id })
         .eq("role", data.role);
+      // app_metadata lands after the signup trigger, so set the role explicitly.
+      await supabaseAdmin.from("user_roles").delete().eq("user_id", created.data.user.id);
+      await supabaseAdmin
+        .from("user_roles")
+        .insert({ user_id: created.data.user.id, role: data.role });
     }
     const link = await supabaseAdmin.auth.admin.generateLink({ type: "magiclink", email });
     if (link.error) throw new Error(link.error.message);
