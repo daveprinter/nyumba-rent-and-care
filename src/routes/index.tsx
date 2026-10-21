@@ -202,7 +202,7 @@ function Landing() {
           ) : (
             <form onSubmit={staffSignIn} className="space-y-4">
               <h2 className="text-xl font-semibold capitalize">{role} log in</h2>
-              <Field name="code" label={`${role} access code`} type="password" />
+              <Field name="code" label={`${role} access code`} type="code" />
               <Button type="submit" className="w-full" disabled={loading}>
                 Log in
               </Button>
@@ -222,7 +222,8 @@ function Field({ name, label, type = "text" }: { name: string; label: string; ty
       <Input
         id={name}
         name={name}
-        type={type}
+        type={type === "code" ? "password" : type}
+        inputMode={type === "code" ? "numeric" : undefined}
         required
         minLength={type === "password" ? 6 : undefined}
       />
