@@ -24,11 +24,16 @@ export function isValidMpesaCode(code: string) {
   return MPESA_CODE.test(normalizeCode(code));
 }
 
-export function arrears(bills: Pick<Bill, "amount" | "status" | "id">[], payments: Pick<Payment, "bill_id" | "amount" | "status">[]) {
+export function arrears(
+  bills: Pick<Bill, "amount" | "status" | "id">[],
+  payments: Pick<Payment, "bill_id" | "amount" | "status">[],
+) {
   return bills
     .filter((b) => b.status !== "paid")
     .reduce((sum, b) => {
-      const paid = payments.filter((p) => p.bill_id === b.id && p.status === "approved").reduce((s, p) => s + Number(p.amount), 0);
+      const paid = payments
+        .filter((p) => p.bill_id === b.id && p.status === "approved")
+        .reduce((s, p) => s + Number(p.amount), 0);
       return sum + Math.max(0, Number(b.amount) - paid);
     }, 0);
 }
@@ -47,7 +52,18 @@ export const appQuery = queryOptions({
     const { data: u } = await supabase.auth.getUser();
     const uid = u.user!.id;
     await supabase.rpc("generate_monthly_bills");
-    const [roles, profiles, properties, rooms, leases, bills, payments, maintenance, notices, messages] = await Promise.all([
+    const [
+      roles,
+      profiles,
+      properties,
+      rooms,
+      leases,
+      bills,
+      payments,
+      maintenance,
+      notices,
+      messages,
+    ] = await Promise.all([
       rows(supabase.from("user_roles").select("role").eq("user_id", uid)),
       rows(supabase.from("profiles").select("*")),
       rows(supabase.from("properties").select("*").order("created_at")),
@@ -55,7 +71,9 @@ export const appQuery = queryOptions({
       rows(supabase.from("leases").select("*").order("created_at", { ascending: false })),
       rows(supabase.from("bills").select("*").order("period", { ascending: false })),
       rows(supabase.from("payments").select("*").order("created_at", { ascending: false })),
-      rows(supabase.from("maintenance_requests").select("*").order("created_at", { ascending: false })),
+      rows(
+        supabase.from("maintenance_requests").select("*").order("created_at", { ascending: false }),
+      ),
       rows(supabase.from("notices").select("*").order("created_at", { ascending: false })),
       rows(supabase.from("messages").select("*").order("created_at")),
     ]);

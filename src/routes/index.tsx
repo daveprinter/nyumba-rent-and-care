@@ -15,9 +15,17 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "NyumbaLink — Rent, tenants & maintenance in one place" },
-      { name: "description", content: "Landlords, caretakers and tenants run a rental property together: M-PESA rent, leases, repairs and messaging." },
+      {
+        name: "description",
+        content:
+          "Landlords, caretakers and tenants run a rental property together: M-PESA rent, leases, repairs and messaging.",
+      },
       { property: "og:title", content: "NyumbaLink — Run your rental together" },
-      { property: "og:description", content: "Landlords, caretakers and tenants in one place: rent, leases, repairs and messaging." },
+      {
+        property: "og:description",
+        content:
+          "Landlords, caretakers and tenants in one place: rent, leases, repairs and messaging.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -47,7 +55,10 @@ function Landing() {
       password: String(f.get("password")),
     });
     setLoading(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     navigate({ to: "/dashboard" });
   }
 
@@ -64,7 +75,10 @@ function Landing() {
       },
     });
     setLoading(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     if (data.session) navigate({ to: "/dashboard" });
     else toast.success("Account created! Check your email to confirm, then sign in.");
   }
@@ -103,14 +117,21 @@ function Landing() {
       <div className="relative z-10 mx-auto grid min-h-screen max-w-6xl items-center gap-10 px-6 py-12 lg:grid-cols-2">
         <section className="animate-fade-rise">
           <div className="mb-6 inline-flex items-center gap-3 rounded-full glass px-4 py-2 text-foreground">
-            <img src={logo} alt="NyumbaLink logo" width={36} height={36} className="h-9 w-9 object-contain" />
+            <img
+              src={logo}
+              alt="NyumbaLink logo"
+              width={36}
+              height={36}
+              className="h-9 w-9 object-contain"
+            />
             <span className="font-display text-lg font-bold">NyumbaLink</span>
           </div>
           <h1 className="text-5xl font-bold leading-tight md:text-6xl">
             One home for <span className="text-accent">landlords</span>, caretakers & tenants.
           </h1>
           <p className="mt-5 max-w-md text-lg opacity-85">
-            Monthly rent billed automatically, M-PESA codes verified in a tap, repairs tracked until they're done.
+            Monthly rent billed automatically, M-PESA codes verified in a tap, repairs tracked until
+            they're done.
           </p>
           <div className="mt-8 flex items-center gap-3 opacity-90">
             <KeyRound className="animate-key-swing h-8 w-8 text-accent" />
@@ -128,7 +149,9 @@ function Landing() {
               <form onSubmit={signIn} className="mt-4 space-y-4">
                 <Field name="email" label="Email" type="email" />
                 <Field name="password" label="Password" type="password" />
-                <Button type="submit" className="w-full" disabled={loading}>Log in</Button>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  Log in
+                </Button>
               </form>
             </TabsContent>
             <TabsContent value="signup">
@@ -137,7 +160,13 @@ function Landing() {
                   <Label>I am a</Label>
                   <div className="mt-2 grid grid-cols-3 gap-2">
                     {(["tenant", "caretaker", "landlord"] as const).map((r) => (
-                      <Button key={r} type="button" variant={role === r ? "default" : "outline"} onClick={() => setRole(r)} className="capitalize">
+                      <Button
+                        key={r}
+                        type="button"
+                        variant={role === r ? "default" : "outline"}
+                        onClick={() => setRole(r)}
+                        className="capitalize"
+                      >
                         {r}
                       </Button>
                     ))}
@@ -147,7 +176,9 @@ function Landing() {
                 <Field name="phone" label="Phone (M-PESA)" />
                 <Field name="email" label="Email" type="email" />
                 <Field name="password" label="Password" type="password" />
-                <Button type="submit" className="w-full" disabled={loading}>Create account</Button>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  Create account
+                </Button>
               </form>
             </TabsContent>
           </Tabs>
@@ -161,7 +192,13 @@ function Field({ name, label, type = "text" }: { name: string; label: string; ty
   return (
     <div className="space-y-1.5">
       <Label htmlFor={name}>{label}</Label>
-      <Input id={name} name={name} type={type} required minLength={type === "password" ? 6 : undefined} />
+      <Input
+        id={name}
+        name={name}
+        type={type}
+        required
+        minLength={type === "password" ? 6 : undefined}
+      />
     </div>
   );
 }

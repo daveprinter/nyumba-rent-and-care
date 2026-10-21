@@ -8,7 +8,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { appQuery, type AppData } from "@/lib/nyumba";
 import { Overview, PropertiesPanel } from "@/components/nl/landlord";
 import { StaffPayments, TenantRent } from "@/components/nl/payments";
-import { MaintenancePanel, MessagesPanel, MovingPanel, TimelinePanel } from "@/components/nl/shared";
+import {
+  MaintenancePanel,
+  MessagesPanel,
+  MovingPanel,
+  TimelinePanel,
+} from "@/components/nl/shared";
 import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -17,7 +22,10 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { title: "Dashboard — NyumbaLink" },
       { name: "description", content: "Your NyumbaLink rent, tenants, repairs and messages." },
       { property: "og:title", content: "Dashboard — NyumbaLink" },
-      { property: "og:description", content: "Your NyumbaLink rent, tenants, repairs and messages." },
+      {
+        property: "og:description",
+        content: "Your NyumbaLink rent, tenants, repairs and messages.",
+      },
     ],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(appQuery),
@@ -58,8 +66,12 @@ function Dashboard() {
   useEffect(() => {
     const ch = supabase
       .channel("nyumba-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => qc.invalidateQueries({ queryKey: ["nyumba"] }))
-      .on("postgres_changes", { event: "*", schema: "public", table: "payments" }, () => qc.invalidateQueries({ queryKey: ["nyumba"] }))
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () =>
+        qc.invalidateQueries({ queryKey: ["nyumba"] }),
+      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "payments" }, () =>
+        qc.invalidateQueries({ queryKey: ["nyumba"] }),
+      )
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
@@ -81,23 +93,46 @@ function Dashboard() {
       <header className="sticky top-0 z-20 border-b glass">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="NyumbaLink" width={36} height={36} className="h-9 w-9 object-contain" />
+            <img
+              src={logo}
+              alt="NyumbaLink"
+              width={36}
+              height={36}
+              className="h-9 w-9 object-contain"
+            />
             <span className="font-display text-lg font-bold">NyumbaLink</span>
-            <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-xs capitalize text-secondary-foreground">{d.role}</span>
+            <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-xs capitalize text-secondary-foreground">
+              {d.role}
+            </span>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <span className="flex items-center gap-1"><Bell className="h-4 w-4" />{unread}</span>
+            <span className="flex items-center gap-1">
+              <Bell className="h-4 w-4" />
+              {unread}
+            </span>
             <span className="hidden sm:inline">{d.me?.full_name || d.me?.email}</span>
-            <Button size="sm" variant="ghost" onClick={signOut}><LogOut className="mr-1 h-4 w-4" />Sign out</Button>
+            <Button size="sm" variant="ghost" onClick={signOut}>
+              <LogOut className="mr-1 h-4 w-4" />
+              Sign out
+            </Button>
           </div>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6">
         <Tabs defaultValue={tabs[0]!.id}>
           <TabsList className="mb-6 h-auto flex-wrap">
-            {tabs.map((t) => <TabsTrigger key={t.id} value={t.id}>{t.label}{t.id === "messages" && unread > 0 ? ` (${unread})` : ""}</TabsTrigger>)}
+            {tabs.map((t) => (
+              <TabsTrigger key={t.id} value={t.id}>
+                {t.label}
+                {t.id === "messages" && unread > 0 ? ` (${unread})` : ""}
+              </TabsTrigger>
+            ))}
           </TabsList>
-          {tabs.map((t) => <TabsContent key={t.id} value={t.id}>{t.render(d)}</TabsContent>)}
+          {tabs.map((t) => (
+            <TabsContent key={t.id} value={t.id}>
+              {t.render(d)}
+            </TabsContent>
+          ))}
         </Tabs>
       </main>
     </div>

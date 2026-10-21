@@ -8,7 +8,10 @@ export function useRefresh() {
   return () => qc.invalidateQueries({ queryKey: ["nyumba"] });
 }
 
-export async function run(fn: () => PromiseLike<{ error: { message: string } | null }>, ok?: string) {
+export async function run(
+  fn: () => PromiseLike<{ error: { message: string } | null }>,
+  ok?: string,
+) {
   const { error } = await fn();
   if (error) {
     toast.error(error.message);
@@ -18,7 +21,15 @@ export async function run(fn: () => PromiseLike<{ error: { message: string } | n
   return true;
 }
 
-export function Section({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
+export function Section({
+  title,
+  action,
+  children,
+}: {
+  title: string;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <section className="rounded-2xl border bg-card p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between gap-3">
@@ -31,7 +42,11 @@ export function Section({ title, action, children }: { title: string; action?: R
 }
 
 export function Empty({ children }: { children: ReactNode }) {
-  return <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">{children}</p>;
+  return (
+    <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+      {children}
+    </p>
+  );
 }
 
 const tone: Record<string, string> = {
@@ -48,7 +63,15 @@ export function Status({ value }: { value: string }) {
   return <Badge className={`capitalize ${tone[value] ?? ""}`}>{value.replace("_", " ")}</Badge>;
 }
 
-export function Stat({ label, value, hint }: { label: string; value: ReactNode; hint?: string | undefined }) {
+export function Stat({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: ReactNode;
+  hint?: string | undefined;
+}) {
   return (
     <div className="rounded-2xl border bg-card p-4">
       <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
@@ -58,4 +81,7 @@ export function Stat({ label, value, hint }: { label: string; value: ReactNode; 
   );
 }
 
-export const fmtDate = (d?: string | null) => (d ? new Date(d).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" }) : "—");
+export const fmtDate = (d?: string | null) =>
+  d
+    ? new Date(d).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" })
+    : "—";

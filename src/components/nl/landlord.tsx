@@ -10,7 +10,13 @@ import { Empty, Section, Stat, Status, fmtDate, run, useRefresh } from "./common
 export function Overview({ d }: { d: AppData }) {
   const active = d.leases.filter((l) => l.active);
   const owing = active
-    .map((l) => ({ l, amt: arrears(d.bills.filter((b) => b.lease_id === l.id), d.payments) }))
+    .map((l) => ({
+      l,
+      amt: arrears(
+        d.bills.filter((b) => b.lease_id === l.id),
+        d.payments,
+      ),
+    }))
     .filter((x) => x.amt > 0);
   return (
     <div className="space-y-6">
@@ -18,7 +24,11 @@ export function Overview({ d }: { d: AppData }) {
         <Stat label="Properties" value={d.properties.length} />
         <Stat label="Rooms occupied" value={`${active.length}/${d.rooms.length}`} />
         <Stat label="Arrears" value={kes(owing.reduce((s, x) => s + x.amt, 0))} />
-        <Stat label="Payments to verify" value={d.payments.filter((p) => p.status === "pending").length} hint={`${d.maintenance.filter((m) => m.status !== "closed").length} open repairs`} />
+        <Stat
+          label="Payments to verify"
+          value={d.payments.filter((p) => p.status === "pending").length}
+          hint={`${d.maintenance.filter((m) => m.status !== "closed").length} open repairs`}
+        />
       </div>
       <Section title="Arrears">
         {owing.length === 0 ? (
@@ -29,7 +39,9 @@ export function Overview({ d }: { d: AppData }) {
               const room = d.rooms.find((r) => r.id === l.room_id);
               return (
                 <li key={l.id} className="flex justify-between py-2 text-sm">
-                  <span>{nameOf(d, l.tenant_id)} · {room?.name}</span>
+                  <span>
+                    {nameOf(d, l.tenant_id)} · {room?.name}
+                  </span>
                   <span className="font-semibold text-destructive">{kes(amt)}</span>
                 </li>
               );
@@ -42,12 +54,17 @@ export function Overview({ d }: { d: AppData }) {
           <Empty>No leases with end dates.</Empty>
         ) : (
           <ul className="divide-y text-sm">
-            {active.filter((l) => l.end_date).sort((a, b) => a.end_date!.localeCompare(b.end_date!)).map((l) => (
-              <li key={l.id} className="flex justify-between py-2">
-                <span>{nameOf(d, l.tenant_id)} · {d.rooms.find((r) => r.id === l.room_id)?.name}</span>
-                <span>{fmtDate(l.end_date)}</span>
-              </li>
-            ))}
+            {active
+              .filter((l) => l.end_date)
+              .sort((a, b) => a.end_date!.localeCompare(b.end_date!))
+              .map((l) => (
+                <li key={l.id} className="flex justify-between py-2">
+                  <span>
+                    {nameOf(d, l.tenant_id)} · {d.rooms.find((r) => r.id === l.room_id)?.name}
+                  </span>
+                  <span>{fmtDate(l.end_date)}</span>
+                </li>
+              ))}
           </ul>
         )}
       </Section>
@@ -61,7 +78,19 @@ export function PropertiesPanel({ d }: { d: AppData }) {
     e.preventDefault();
     const form = e.currentTarget;
     const f = new FormData(form);
-    if (await run(() => supabase.from("properties").insert({ name: String(f.get("name")), location: String(f.get("location")), landlord_id: d.uid }), "House added")) {
+    if (
+      await run(
+        () =>
+          supabase
+            .from("properties")
+            .insert({
+              name: String(f.get("name")),
+              location: String(f.get("location")),
+              landlord_id: d.uid,
+            }),
+        "House added",
+      )
+    ) {
       form.reset();
       refresh();
     }
@@ -92,25 +121,55 @@ function PropertyCard({ d, pid }: { d: AppData; pid: string }) {
     e.preventDefault();
     const email = String(new FormData(e.currentTarget).get("email"));
     const { data: id } = await supabase.rpc("find_user_by_email", { _email: email });
-    if (!id) { toast.error("No NyumbaLink account with that email."); return; }
-    if (await run(() => supabase.from("properties").update({ caretaker_id: id }).eq("id", pid), "Caretaker assigned")) refresh();
+    if (!id) {
+      toast.error("No NyumbaLink account with that email.");
+      return;
+    }
+    if (
+      await run(
+        () => supabase.from("properties").update({ caretaker_id: id }).eq("id", pid),
+        "Caretaker assigned",
+      )
+    )
+      refresh();
   }
   async function addRoom(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const f = new FormData(form);
-    if (await run(() => supabase.from("rooms").insert({ property_id: pid, name: String(f.get("name")), rent: Number(f.get("rent")) }), "Room added")) {
+    if (
+      await run(
+        () =>
+          supabase
+            .from("rooms")
+            .insert({ property_id: pid, name: String(f.get("name")), rent: Number(f.get("rent")) }),
+        "Room added",
+      )
+    ) {
       form.reset();
       refresh();
     }
   }
 
   return (
-    <Section title={p.name} action={<span className="text-sm text-muted-foreground">{p.location}</span>}>
+    <Section
+      title={p.name}
+      action={<span className="text-sm text-muted-foreground">{p.location}</span>}
+    >
       <form onSubmit={setCaretaker} className="mb-4 flex flex-wrap items-center gap-2 text-sm">
-        <span>Caretaker: <b>{nameOf(d, p.caretaker_id)}</b></span>
-        <Input name="email" type="email" placeholder="Caretaker's email" className="h-8 max-w-xs" required />
-        <Button size="sm" variant="outline" type="submit">Assign</Button>
+        <span>
+          Caretaker: <b>{nameOf(d, p.caretaker_id)}</b>
+        </span>
+        <Input
+          name="email"
+          type="email"
+          placeholder="Caretaker's email"
+          className="h-8 max-w-xs"
+          required
+        />
+        <Button size="sm" variant="outline" type="submit">
+          Assign
+        </Button>
       </form>
       <div className="space-y-3">
         {rooms.map((r) => (
@@ -120,7 +179,9 @@ function PropertyCard({ d, pid }: { d: AppData; pid: string }) {
       <form onSubmit={addRoom} className="mt-4 grid gap-2 md:grid-cols-[1fr_160px_auto]">
         <Input name="name" placeholder="Room e.g. A1" required />
         <Input name="rent" type="number" min={0} placeholder="Monthly rent" required />
-        <Button type="submit" variant="secondary">Add room</Button>
+        <Button type="submit" variant="secondary">
+          Add room
+        </Button>
       </form>
     </Section>
   );
@@ -134,8 +195,13 @@ function RoomRow({ d, room }: { d: AppData; room: Room }) {
   async function assign(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    const { data: tenantId } = await supabase.rpc("find_user_by_email", { _email: String(f.get("email")) });
-    if (!tenantId) { toast.error("That tenant needs to create a NyumbaLink account first."); return; }
+    const { data: tenantId } = await supabase.rpc("find_user_by_email", {
+      _email: String(f.get("email")),
+    });
+    if (!tenantId) {
+      toast.error("That tenant needs to create a NyumbaLink account first.");
+      return;
+    }
     const ok = await run(
       () =>
         supabase.from("leases").insert({
@@ -155,9 +221,22 @@ function RoomRow({ d, room }: { d: AppData; room: Room }) {
   }
   async function endLease() {
     if (!lease) return;
-    const ok = await run(() => supabase.from("leases").update({ active: false, end_date: new Date().toISOString().slice(0, 10) }).eq("id", lease.id));
+    const ok = await run(() =>
+      supabase
+        .from("leases")
+        .update({ active: false, end_date: new Date().toISOString().slice(0, 10) })
+        .eq("id", lease.id),
+    );
     if (ok) {
-      await supabase.from("notices").insert({ property_id: room.property_id, author_id: d.uid, kind: "move_out", title: "Move-out", body: `${nameOf(d, lease.tenant_id)} moved out of ${room.name}` });
+      await supabase
+        .from("notices")
+        .insert({
+          property_id: room.property_id,
+          author_id: d.uid,
+          kind: "move_out",
+          title: "Move-out",
+          body: `${nameOf(d, lease.tenant_id)} moved out of ${room.name}`,
+        });
       toast.success("Lease ended");
       refresh();
     }
@@ -167,30 +246,57 @@ function RoomRow({ d, room }: { d: AppData; room: Room }) {
     <div className="rounded-xl border bg-muted/40 p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className="font-semibold">{room.name} <span className="font-normal text-muted-foreground">· {kes(room.rent)}/mo</span></p>
+          <p className="font-semibold">
+            {room.name}{" "}
+            <span className="font-normal text-muted-foreground">· {kes(room.rent)}/mo</span>
+          </p>
           {lease ? (
             <p className="text-sm text-muted-foreground">
-              {nameOf(d, lease.tenant_id)} · from {fmtDate(lease.start_date)} {lease.end_date && `to ${fmtDate(lease.end_date)}`}
+              {nameOf(d, lease.tenant_id)} · from {fmtDate(lease.start_date)}{" "}
+              {lease.end_date && `to ${fmtDate(lease.end_date)}`}
             </p>
           ) : (
             <Status value="open" />
           )}
         </div>
         {lease ? (
-          <Button size="sm" variant="outline" onClick={endLease}>End lease / move out</Button>
+          <Button size="sm" variant="outline" onClick={endLease}>
+            End lease / move out
+          </Button>
         ) : (
-          <Button size="sm" onClick={() => setOpen(!open)}>Assign tenant</Button>
+          <Button size="sm" onClick={() => setOpen(!open)}>
+            Assign tenant
+          </Button>
         )}
       </div>
-      {lease?.agreement && <p className="mt-2 whitespace-pre-wrap rounded-lg bg-card p-2 text-xs">{lease.agreement}</p>}
+      {lease?.agreement && (
+        <p className="mt-2 whitespace-pre-wrap rounded-lg bg-card p-2 text-xs">{lease.agreement}</p>
+      )}
       {open && !lease && (
         <form onSubmit={assign} className="mt-3 grid gap-2 md:grid-cols-2">
           <Input name="email" type="email" placeholder="Tenant's email" required />
           <Input name="rent" type="number" defaultValue={room.rent} required />
-          <label className="text-xs">Start date<Input name="start" type="date" required defaultValue={new Date().toISOString().slice(0, 10)} /></label>
-          <label className="text-xs">End date (optional)<Input name="end" type="date" /></label>
-          <Textarea name="agreement" placeholder="Lease agreement terms" className="md:col-span-2" />
-          <Button type="submit" className="md:col-span-2">Create lease</Button>
+          <label className="text-xs">
+            Start date
+            <Input
+              name="start"
+              type="date"
+              required
+              defaultValue={new Date().toISOString().slice(0, 10)}
+            />
+          </label>
+          <label className="text-xs">
+            End date (optional)
+            <Input name="end" type="date" />
+          </label>
+          <Textarea
+            name="agreement"
+            placeholder="Lease agreement terms"
+            className="md:col-span-2"
+          />
+          <Button type="submit" className="md:col-span-2">
+            Create lease
+          </Button>
         </form>
       )}
     </div>
