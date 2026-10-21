@@ -48,7 +48,7 @@ export function Status({ value }: { value: string }) {
   return <Badge className={`capitalize ${tone[value] ?? ""}`}>{value.replace("_", " ")}</Badge>;
 }
 
-export function Stat({ label, value, hint }: { label: string; value: ReactNode; hint?: string }) {
+export function Stat({ label, value, hint }: { label: string; value: ReactNode; hint?: string | undefined }) {
   return (
     <div className="rounded-2xl border bg-card p-4">
       <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>

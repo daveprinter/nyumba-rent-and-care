@@ -32,7 +32,7 @@ function ReviewRow({ d, p }: { d: AppData; p: Payment }) {
   const { room, property } = leaseInfo(d, p.lease_id);
   async function review(approve: boolean) {
     const { error } = await supabase.rpc("review_payment", { _payment_id: p.id, _code: code, _approve: approve });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(approve ? "Code matched — payment approved" : "Payment rejected");
     refresh();
   }
@@ -91,7 +91,7 @@ export function TenantRent({ d }: { d: AppData }) {
   const mine = d.payments.filter((p) => p.lease_id === lease.id);
 
   async function verify() {
-    if (!isValidMpesaCode(code)) return toast.error("An M-PESA code has 10 letters and numbers, e.g. SJK3H7LQ2X");
+    if (!isValidMpesaCode(code)) { toast.error("An M-PESA code has 10 letters and numbers, e.g. SJK3H7LQ2X"); return; }
     const bill = unpaid.find((b) => b.id === billId) ?? unpaid[0];
     const ok = await run(
       () => supabase.from("payments").insert({ lease_id: lease!.id, bill_id: bill?.id ?? null, tenant_id: d.uid, mpesa_code: normalizeCode(code), amount: Number(amount || bill?.amount || lease!.monthly_rent) }),
@@ -105,7 +105,7 @@ export function TenantRent({ d }: { d: AppData }) {
   }
   async function send(p: Payment, l: boolean, c: boolean) {
     const { error } = await supabase.rpc("send_payment", { _payment_id: p.id, _to_landlord: l, _to_caretaker: c });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Sent! It's now on their dashboard for approval.");
     refresh();
   }

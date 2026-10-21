@@ -47,7 +47,7 @@ function Landing() {
       password: String(f.get("password")),
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     navigate({ to: "/dashboard" });
   }
 
@@ -64,7 +64,7 @@ function Landing() {
       },
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     if (data.session) navigate({ to: "/dashboard" });
     else toast.success("Account created! Check your email to confirm, then sign in.");
   }
@@ -83,7 +83,7 @@ function Landing() {
       <div className="absolute inset-0 bg-hero-overlay" />
       <div className="pointer-events-none absolute inset-0">
         {Array.from({ length: 14 }).map((_, i) => {
-          const Icon = floaters[i % floaters.length];
+          const Icon = floaters[i % floaters.length]!;
           return (
             <Icon
               key={i}

@@ -92,7 +92,7 @@ function PropertyCard({ d, pid }: { d: AppData; pid: string }) {
     e.preventDefault();
     const email = String(new FormData(e.currentTarget).get("email"));
     const { data: id } = await supabase.rpc("find_user_by_email", { _email: email });
-    if (!id) return toast.error("No NyumbaLink account with that email.");
+    if (!id) { toast.error("No NyumbaLink account with that email."); return; }
     if (await run(() => supabase.from("properties").update({ caretaker_id: id }).eq("id", pid), "Caretaker assigned")) refresh();
   }
   async function addRoom(e: React.FormEvent<HTMLFormElement>) {
@@ -135,7 +135,7 @@ function RoomRow({ d, room }: { d: AppData; room: Room }) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
     const { data: tenantId } = await supabase.rpc("find_user_by_email", { _email: String(f.get("email")) });
-    if (!tenantId) return toast.error("That tenant needs to create a NyumbaLink account first.");
+    if (!tenantId) { toast.error("That tenant needs to create a NyumbaLink account first."); return; }
     const ok = await run(
       () =>
         supabase.from("leases").insert({

@@ -93,7 +93,7 @@ function Dashboard() {
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6">
-        <Tabs defaultValue={tabs[0].id}>
+        <Tabs defaultValue={tabs[0]!.id}>
           <TabsList className="mb-6 h-auto flex-wrap">
             {tabs.map((t) => <TabsTrigger key={t.id} value={t.id}>{t.label}{t.id === "messages" && unread > 0 ? ` (${unread})` : ""}</TabsTrigger>)}
           </TabsList>
