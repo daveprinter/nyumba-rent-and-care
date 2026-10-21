@@ -14,6 +14,7 @@ import {
   MovingPanel,
   TimelinePanel,
 } from "@/components/nl/shared";
+import { AccessCodesPanel } from "@/components/nl/codes";
 import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -41,6 +42,7 @@ const tabsFor: Record<AppData["role"], Tab[]> = {
     { id: "repairs", label: "Maintenance", render: (d) => <MaintenancePanel d={d} /> },
     { id: "messages", label: "Messages", render: (d) => <MessagesPanel d={d} /> },
     { id: "timeline", label: "Notices & timeline", render: (d) => <TimelinePanel d={d} /> },
+    { id: "codes", label: "Access codes", render: (d) => <AccessCodesPanel d={d} /> },
   ],
   caretaker: [
     { id: "overview", label: "Overview", render: (d) => <Overview d={d} /> },
@@ -48,6 +50,7 @@ const tabsFor: Record<AppData["role"], Tab[]> = {
     { id: "repairs", label: "Maintenance", render: (d) => <MaintenancePanel d={d} /> },
     { id: "messages", label: "Messages", render: (d) => <MessagesPanel d={d} /> },
     { id: "timeline", label: "Notices & timeline", render: (d) => <TimelinePanel d={d} /> },
+    { id: "codes", label: "My access code", render: (d) => <AccessCodesPanel d={d} /> },
   ],
   tenant: [
     { id: "rent", label: "My rent", render: (d) => <TenantRent d={d} /> },
