@@ -16,7 +16,7 @@ export const staffLogin = createServerFn({ method: "POST" })
       .select("*")
       .eq("role", data.role)
       .single();
-    if (error || !row) throw new Error("Login unavailable");
+    if (error || !row) throw new Error(`Login unavailable${error ? ": " + error.message : ""}`);
     if (row.code !== data.code.trim()) throw new Error("Wrong code");
 
     const email = STAFF_EMAIL[data.role];
