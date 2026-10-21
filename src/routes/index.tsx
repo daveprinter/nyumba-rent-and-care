@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Home, KeyRound, Wallet, Wrench, MessageCircle, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { staffLogin } from "@/lib/staff.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -71,7 +72,7 @@ function Landing() {
       password: String(f.get("password")),
       options: {
         emailRedirectTo: window.location.origin,
-        data: { full_name: String(f.get("name")), phone: String(f.get("phone")), role },
+        data: { full_name: String(f.get("name")), phone: String(f.get("phone")) },
       },
     });
     setLoading(false);
@@ -80,7 +81,25 @@ function Landing() {
       return;
     }
     if (data.session) navigate({ to: "/dashboard" });
-    else toast.success("Account created! Check your email to confirm, then sign in.");
+    else toast.error("Could not sign you in. Please log in.");
+  }
+
+  async function staffSignIn(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const code = String(new FormData(e.currentTarget).get("code"));
+    setLoading(true);
+    try {
+      const { tokenHash } = await staffLogin({
+        data: { role: role as "landlord" | "caretaker", code },
+      });
+      const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
+      if (error) throw error;
+      navigate({ to: "/dashboard" });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Login failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -140,48 +159,56 @@ function Landing() {
         </section>
 
         <section className="animate-fade-rise glass rounded-2xl p-6 text-foreground shadow-elegant [animation-delay:200ms]">
-          <Tabs defaultValue="signin">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Log in</TabsTrigger>
-              <TabsTrigger value="signup">Create account</TabsTrigger>
-            </TabsList>
-            <TabsContent value="signin">
-              <form onSubmit={signIn} className="mt-4 space-y-4">
-                <Field name="email" label="Email" type="email" />
-                <Field name="password" label="Password" type="password" />
-                <Button type="submit" className="w-full" disabled={loading}>
-                  Log in
-                </Button>
-              </form>
-            </TabsContent>
-            <TabsContent value="signup">
-              <form onSubmit={signUp} className="mt-4 space-y-4">
-                <div>
-                  <Label>I am a</Label>
-                  <div className="mt-2 grid grid-cols-3 gap-2">
-                    {(["tenant", "caretaker", "landlord"] as const).map((r) => (
-                      <Button
-                        key={r}
-                        type="button"
-                        variant={role === r ? "default" : "outline"}
-                        onClick={() => setRole(r)}
-                        className="capitalize"
-                      >
-                        {r}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-                <Field name="name" label="Full name" />
-                <Field name="phone" label="Phone (M-PESA)" />
-                <Field name="email" label="Email" type="email" />
-                <Field name="password" label="Password" type="password" />
-                <Button type="submit" className="w-full" disabled={loading}>
-                  Create account
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+          <div className="mb-4 grid grid-cols-3 gap-2">
+            {(["tenant", "caretaker", "landlord"] as const).map((r) => (
+              <Button
+                key={r}
+                type="button"
+                variant={role === r ? "default" : "outline"}
+                onClick={() => setRole(r)}
+                className="capitalize"
+              >
+                {r}
+              </Button>
+            ))}
+          </div>
+          {role === "tenant" ? (
+            <Tabs defaultValue="signin">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="signin">Log in</TabsTrigger>
+                <TabsTrigger value="signup">Create account</TabsTrigger>
+              </TabsList>
+              <TabsContent value="signin">
+                <form onSubmit={signIn} className="mt-4 space-y-4">
+                  <Field name="email" label="Email" type="email" />
+                  <Field name="password" label="Password" type="password" />
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    Log in
+                  </Button>
+                </form>
+              </TabsContent>
+              <TabsContent value="signup">
+                <form onSubmit={signUp} className="mt-4 space-y-4">
+                  <Field name="name" label="Full name" />
+                  <Field name="phone" label="Phone (M-PESA)" />
+                  <Field name="email" label="Email" type="email" />
+                  <Field name="password" label="Password" type="password" />
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    Create tenant account
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <form onSubmit={staffSignIn} className="space-y-4">
+              <h2 className="text-xl font-semibold capitalize">{role} log in</h2>
+              <Field name="code" label={`${role} access code`} type="code" />
+              <Button type="submit" className="w-full" disabled={loading}>
+                Log in
+              </Button>
+            </form>
+          )}
+
         </section>
       </div>
     </main>
@@ -195,7 +222,8 @@ function Field({ name, label, type = "text" }: { name: string; label: string; ty
       <Input
         id={name}
         name={name}
-        type={type}
+        type={type === "code" ? "password" : type}
+        inputMode={type === "code" ? "numeric" : undefined}
         required
         minLength={type === "password" ? 6 : undefined}
       />
